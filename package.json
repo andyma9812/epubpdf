@@ -1,0 +1,11 @@
+{
+  "name": "epubproj",
+  "version": "1.0.0",
+  "description": "epub stuff",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "andy",
+  "license": "ISC"
+}
