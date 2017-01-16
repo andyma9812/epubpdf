@@ -1,5 +1,5 @@
 {
     "filepath": "/home/andy/epubs/test.epub",
-    "imagewebroot": "/images",
-    "chapterwebroot": "/chapter"
+    "imagewebroot": "/images/",
+    "chapterwebroot": "/links/"
 }

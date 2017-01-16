@@ -3,6 +3,7 @@ var Epub = require('epub'),
     htmlToText = require('html-to-text'),
     path = require('path'),
     fs = require('fs'),
+    pdf = require('html-pdf'),
     epubfile = config.filepath,
     imagewebroot = config.imagewebroot,
     chapterwebroot = config.chapterwebroot,
@@ -14,7 +15,9 @@ epub.on("end", function() {
         chapterList = [],
         chapterObj = {
             chapterText: ""
-        };
+        },
+        imageName = "",
+        imageNamesArray = [];
 
     epub.flow.forEach(function(chapter) {
         chapterList.push(chapter.id);
@@ -22,40 +25,60 @@ epub.on("end", function() {
     });
     for(i = 0; i<chapterList.length; i++) {
         chapterId = getChapterId(i, chapterList);
-        epub.getChapter(chapterId, function(err, text) {
+        epub.getChapterRaw(chapterId, function(err, text) {
             convertToText(text, chapterObj);
             // console.log(text);
             // console.log(chapterObj.chapterText);
-            writeText(chapterObj);
+            // writeText(chapterObj);
+            writeHtml(text);
         });
     }
     console.log(chapterObj.chapterText);
     // console.log(epub.metadata.title);
-    // epub.getChapter(chapterId, function(err, text) {
-    // console.log(htmlText);
-    // writeFile(text);
-    // convertToText(text, chapterObj);
-    // console.log(chapterObj.chapterText);
-    // writeText(chapterObj);
-    // });
+    // for(i = 0; i<imagesArray.length; i++) {
+        epub.getImage(imageName, function(error, img, mimeType) {
+            if(error) return console.log(error);
+            writeImage(img, imageName);
+        });
+    // }
 });
 epub.parse();
+
+// createPdf();
+
+function createPdf() {
+    var html = fs.readFileSync(path.join(__dirname, 'htmlfile.html'), 'utf-8');
+    var options = {
+        // "format": 'Letter'
+    };
+
+    pdf.create(html, options).toFile(path.join(__dirname, 'pdffile.pdf'), function(err, res) {
+        if(err) return console.log(err);
+        console.log(res);
+    });
+}
 
 function getChapterId(count, chapterList) {
     var currentChap;
 
     currentChap = chapterList[count];
     // console.log(currentChap);
-    // count = count + 1;
     return currentChap;
 }
 
-// function writeFile(htmlText) {
-//     fs.writeFile(path.join(__dirname, 'htmltest.html'), htmlText, function(err) {
-//         if (err) return console.log(err);
-//         console.log('Wrote to htmltest.html');
-//     });
-// }
+function writeImage(img, imageName) {
+    fs.writeFile(path.join(__dirname + '/images/', imageName), img, function(err) {
+        if(err) return console.log(err);
+        // console.log('Wrote to image.jpeg');
+    });
+}
+
+function writeHtml(htmlText) {
+    fs.appendFile(path.join(__dirname, 'htmlfile.html'), htmlText, function(err) {
+        if(err) return console.log(err);
+        // console.log('Wrote to htmltest.html');
+    });
+}
 
 function convertToText(htmlText, chapterObj) {
     chapterObj.chapterText = htmlToText.fromString(htmlText, {
@@ -66,7 +89,7 @@ function convertToText(htmlText, chapterObj) {
 
 function writeText(chapterObj) {
     fs.appendFile(path.join(__dirname, 'rawtext.txt'), chapterObj.chapterText, function(err) {
-        if (err) return console.log(err);
-        console.log('Wrote to rawtext.txt');
+        if(err) return console.log(err);
+        // console.log('Wrote to rawtext.txt');
     });
 }
